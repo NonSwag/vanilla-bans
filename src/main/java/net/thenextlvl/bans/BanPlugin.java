@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.thenextlvl.bans.command.*;
+import net.thenextlvl.bans.listener.ConnectionListener;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -38,6 +39,8 @@ public class BanPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        Bukkit.getPluginManager().registerEvents(new ConnectionListener(this), this);
+
         Bukkit.getCommandMap().register(getName(), new BanCommand(this));
         Bukkit.getCommandMap().register(getName(), new BanIPCommand(this));
         Bukkit.getCommandMap().register(getName(), new BanlistCommand(this));
