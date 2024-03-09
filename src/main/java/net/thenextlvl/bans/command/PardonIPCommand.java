@@ -32,7 +32,7 @@ public class PardonIPCommand extends Command implements PluginIdentifiableComman
             var message = Bukkit.getBanList(BanListType.IP).isBanned(address)
                     ? "command.pardon-ip.success" : "command.pardon-ip.failed";
             plugin.bundle().sendMessage(sender, message,
-                    Placeholder.parsed("address", address.getHostName()));
+                    Placeholder.parsed("address", address.getHostAddress()));
             Bukkit.getBanList(BanListType.IP).pardon(address);
         } catch (UnknownHostException e) {
             plugin.bundle().sendMessage(sender, "command.usage.pardon-ip");

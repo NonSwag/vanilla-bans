@@ -9,15 +9,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Stream;
-
-import static net.thenextlvl.bans.listener.ConnectionListener.format;
 
 @Getter
 public class BanCommand extends Command implements PluginIdentifiableCommand {
@@ -34,15 +31,14 @@ public class BanCommand extends Command implements PluginIdentifiableCommand {
         if (args.length == 0) plugin.bundle().sendMessage(sender, "command.usage.ban");
         else Bukkit.getAsyncScheduler().runNow(plugin, task -> {
             var player = Bukkit.getOfflinePlayer(args[0]);
-            if (player.getPlayer() != null) player.getPlayer().getScheduler().run(plugin, task1 ->
-                    ban(sender, player, args), null);
+            if (player.getPlayer() != null) player.getPlayer().getScheduler()
+                    .run(plugin, task1 -> ban(sender, player, args), null);
             else ban(sender, player, args);
         });
         return true;
     }
 
     private void ban(CommandSender sender, OfflinePlayer player, String[] args) {
-        var reason = args.length >= 3 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
         var expires = args.length >= 2 ? parseDuration(args[1]) : Long.valueOf(-1L);
 
         if (expires == null) {
@@ -52,14 +48,7 @@ public class BanCommand extends Command implements PluginIdentifiableCommand {
 
         var source = sender instanceof Player ? sender.getName() : "Server";
         var time = expires > 0 ? new Date(System.currentTimeMillis() + expires) : null;
-
-        if (player.getPlayer() != null) player.getPlayer().kick(
-                plugin.bundle().component(Locale.US, "disconnect.banned.format",
-                        Placeholder.parsed("source", source),
-                        Placeholder.parsed("reason", reason != null ? reason : "-/-"),
-                        Placeholder.parsed("time", time != null ? format(time) : "∞")
-                ), PlayerKickEvent.Cause.BANNED
-        );
+        var reason = args.length >= 3 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
 
         var ban = player.ban(reason, time, source);
         if (ban != null) ban.save();
