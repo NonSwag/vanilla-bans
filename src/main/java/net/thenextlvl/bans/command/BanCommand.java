@@ -1,6 +1,8 @@
 package net.thenextlvl.bans.command;
 
+import io.papermc.paper.ban.BanListType;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.thenextlvl.bans.BanPlugin;
 import org.bukkit.Bukkit;
@@ -9,6 +11,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.ZonedDateTime;
@@ -50,8 +53,10 @@ public class BanCommand extends Command implements PluginIdentifiableCommand {
         var time = expires > 0 ? new Date(System.currentTimeMillis() + expires) : null;
         var reason = args.length >= 3 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
 
-        var ban = player.ban(reason, time, source);
+        var ban = Bukkit.getBanList(BanListType.PROFILE).addBan(player.getPlayerProfile(), reason, time, source);
         if (ban != null) ban.save();
+
+        if (player.getPlayer() != null) player.getPlayer().kick(Component.empty(), PlayerKickEvent.Cause.BANNED);
 
         var message = (ban != null
                 ? (ban.getExpiration() != null
